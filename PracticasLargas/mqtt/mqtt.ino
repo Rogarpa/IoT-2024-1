@@ -7,7 +7,7 @@
   Escrito por:
   García Padrilla Rodrigo 
   Giron Jimenez Emmanuel
-  Última modificación: 03-Noviembre-2023
+  Última modificación: 04-Noviembre-2023
 */
 
 //Bibliotecas (Herramientas -> Administrar Biblotecas... -> buscardor "EspMQTTClient")
@@ -35,7 +35,7 @@
 const char* ssid = "Totalplay-A9AA";
 const char* password = "A9AAB22FkEScavpX";
 const char* broker = "test.mosquitto.org";
-const char* nameClient = "ESP32_Manu"; //Cambiar nombre
+const char* nameClient = "ESP32_prueba"; //Cambiar nombre
 const int port = 1883;
 
 //topicos
