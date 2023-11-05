@@ -7,7 +7,7 @@
   Escrito por:
   García Padrilla Rodrigo 
   Giron Jimenez Emmanuel
-  Última modificación: 03-Noviembre-2023
+  Última modificación: 04-Noviembre-2023
 */
 
 // Descargar el .ZIP de la página: https://github.com/shurillu/CTBot .Programa -> Incluir Librería -> Añadir blibloteca .ZIP... -> Agregar el .ZIP que se descargo.
@@ -29,7 +29,7 @@ CTBot myBot; // Crea un objeto para interactuar con el bot de Telegram.
 // Detalles de la red Wi-Fi y el token de autenticación del bot de Telegram.
 String ssid = "Totalplay-A9AA";  // Reemplazar con tu SSID de Wi-Fi.
 String pass = "A9AAB22FkEScavpX"; // Reemplazar con tu contraseña de Wi-Fi.
-String token = "6591012358:AAFKGB3_DGxWiu3ai_9Jv_ApDd8_-Ig-gU4"; // Reemplazar con el token de tu bot de Telegram. 
+String token = "6644135453:AAHANQ76hljp7Gqnqdh1X49UKHxdokyBHfY"; // Reemplazar con el token de tu bot de Telegram. 
 
 // Definir estado de los leds.
 int led1State = LOW;
@@ -40,8 +40,9 @@ int led5State = LOW;
 // Estado de la alarma. 
 boolean state = false;
 // Definir el umbral.
-int umbral = 0;
+int umbral = 100000;
 int id = 0;
+boolean esperarUbral = false;  // Variable para controlar si se espera el umbral.
 
 void setup() {
   Serial.begin(115200); // Inicia la comunicación serial.
@@ -80,7 +81,7 @@ void loop() {
       // Si el comando es "/start", responde con un mensaje de bienvenida e instrucciones.
       Serial.print("Nueva interacción de: ");
       Serial.println(msg.sender.username);
-      myBot.sendMessage(msg.sender.id, "Para encender los LEDs:\nMandar 1: si quieres encender el LED nº 1.\nMandar 2: si quieres encender el LED nº 2.\nMandar 3: si quieres encender el LED nº 3.\nMandar 4: si quieres encender el LED nº 4.\nMandar 5: si quieres encender el LED nº 5.\nSi quieres apagar los leds encendidos, volver a mandar el valor del led prendido.\n\nSi quieres el valor actual del potenciómetro, manda /Dato\nSi quieres activar la alarma, manda /Alarma (tendras que establecer un umbral para la alarma).\nSi quieres desactivar la alarma, manda /Alto");
+      myBot.sendMessage(msg.sender.id, "Para encender los LEDs:\nMandar /1: si quieres encender el LED nº 1.\nMandar /2: si quieres encender el LED nº 2.\nMandar /3: si quieres encender el LED nº 3.\nMandar /4: si quieres encender el LED nº 4.\nMandar /5: si quieres encender el LED nº 5.\nSi quieres apagar los leds encendidos, volver a mandar el valor del led prendido.\n\nSi quieres el valor actual del potenciómetro, manda /Dato\nSi quieres activar la alarma, manda /Alarma (tendras que establecer un umbral para la alarma).\nSi quieres desactivar la alarma, manda /Alto");
     }
     else if (msg.text.equalsIgnoreCase("/Alarma")){
       // Si el comando es "/Alarma", activa la alarma y guarda el ID del chat.
@@ -89,16 +90,11 @@ void loop() {
       String mensaje = "Alarma activada.";
       myBot.sendMessage(msg.sender.id, mensaje);
       Serial.println(mensaje);
-      
-        String mensaje1 = "Proporciona el umbral con el que la alarma se activará:";
-        myBot.sendMessage(msg.sender.id, mensaje1);
-        int umbral1 = msg.text.toInt(); // Convierte el texto del mensaje en un número entero.
-        // Verifica si hay un nuevo mensaje para obtener el umbral.
-        if (myBot.getNewMessage(msg)){ //error aqui ya que no me deja establecer un umbral bien
-          //int umbral1 = msg.text.toInt(); // Convierte el texto del mensaje en un número entero.
-          umbral = umbral1;
-          Serial.println(umbral);  
-          } 
+       String mensaje1 = "Proporciona el umbral con el que la alarma se activará:";
+      myBot.sendMessage(msg.sender.id, mensaje1);
+
+      esperarUbral = true;  // Establece la bandera de espera para el umbral.
+        
     }
     else if (msg.text.equalsIgnoreCase("/Alto")){
       // Si el comando es "/Alto", desactiva la alarma.
@@ -108,6 +104,7 @@ void loop() {
       myBot.sendMessage(msg.sender.id, mensaje);
       Serial.println(mensaje);
       id = 0; // Restablece el ID del chat ya que la alarma está desactivada.
+      umbral = 100000;
     }
     else if (msg.text.equalsIgnoreCase("/Dato")) {
       // Si el comando es "/Dato", envía el valor actual del sensor al usuario.
@@ -118,7 +115,7 @@ void loop() {
       myBot.sendMessage(msg.sender.id, mensaje1); // Envía el valor del sensor al chat de Telegram.
       Serial.println("Dato enviado");
     }
-    else if (msg.text.equalsIgnoreCase("1")) {
+    else if (msg.text.equalsIgnoreCase("/1")) {
   // Si el mensaje es "1", alterna el estado del LED1
   led1State = (led1State == LOW) ? HIGH : LOW;
   digitalWrite(pinLED1, led1State);
@@ -132,7 +129,7 @@ void loop() {
     Serial.println("LED 1: OFF");
   }
     }
-    else if (msg.text.equalsIgnoreCase("2")) {
+    else if (msg.text.equalsIgnoreCase("/2")) {
   // Si el mensaje es "2", alterna el estado del LED2
   led2State = (led2State == LOW) ? HIGH : LOW;
   digitalWrite(pinLED2, led2State);
@@ -146,7 +143,7 @@ void loop() {
     Serial.println("LED 2: OFF");
   }
     }
-    else if (msg.text.equalsIgnoreCase("3")) {
+    else if (msg.text.equalsIgnoreCase("/3")) {
   // Si el mensaje es "3", alterna el estado del LED13
   led3State = (led3State == LOW) ? HIGH : LOW;
   digitalWrite(pinLED3, led3State);
@@ -160,7 +157,7 @@ void loop() {
     Serial.println("LED 3: OFF");
   }
     }
-    else if (msg.text.equalsIgnoreCase("4")) {
+    else if (msg.text.equalsIgnoreCase("/4")) {
   // Si el mensaje es "14", alterna el estado del LED4
   led4State = (led4State == LOW) ? HIGH : LOW;
   digitalWrite(pinLED4, led4State);
@@ -174,7 +171,7 @@ void loop() {
     Serial.println("LED 4: OFF");
   }
     }
-    else if (msg.text.equalsIgnoreCase("5")) {
+    else if (msg.text.equalsIgnoreCase("/5")) {
   // Si el mensaje es "5", alterna el estado del LED5
   led5State = (led5State == LOW) ? HIGH : LOW;
   digitalWrite(pinLED5, led5State);
@@ -187,17 +184,29 @@ void loop() {
   } else {
     Serial.println("LED 5: OFF");
   }
+    } else if (esperarUbral) {
+      // Si estamos esperando el umbral, intenta interpretar el mensaje como un umbral.
+      int umbral1 = msg.text.toInt();
+      if (umbral1 > 0) {
+        umbral = umbral1;
+        Serial.println(umbral);
+        esperarUbral = false;  // Reinicia la bandera de espera para el umbral.
+        myBot.sendMessage(msg.sender.id, "Umbral establecido correctamente.");
+      } else {
+        myBot.sendMessage(msg.sender.id, "El umbral debe ser un número entero positivo. Intenta de nuevo.");
+      }
     }
+    
     else {
       // Si el mensaje recibido no coincide con ninguno de los comandos anteriores, envía un mensaje de error.
       myBot.sendMessage(msg.sender.id, "Mensaje no válido, intenta de nuevo con: /start");
     }
   }
   
-  if (sensor > umbral && state) {
+  if (sensor > umbral) {
         Serial.println(sensor);
         String mensaje = "¡¡Alarma encendida!! El nivel aumentó a: " + String(sensor);
-        myBot.sendMessage(id, mensaje);
+        myBot.sendMessage(msg.sender.id, mensaje);
       }
 
     
